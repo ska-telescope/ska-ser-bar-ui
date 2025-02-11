@@ -1,5 +1,3 @@
-//"use server";
-
 export interface Artefact {
     name: string;
     artifactCount: string;
@@ -19,7 +17,7 @@ export interface ArtefactVersion {
     created_at: string;
 }
 
-const API_BASE_URL = "http://localhost:8000/binary_artefacts/v1"; // Change this to your actual API URL
+const API_BASE_URL = "http://localhost:8000/binary_artefacts/v1";
 
 export async function fetchArtefacts(page: number = 1, pageSize: number = 10): Promise<{ artefacts: Artefact[]; total: number }> {
     try {
@@ -80,9 +78,51 @@ export async function fetchArtefactVersions(artefact_name: string, page: number 
 export const downloadArtefact = (artefactName: string, tag: string): void => {
     const downloadUrl = `${API_BASE_URL}/artefacts/${artefactName}/tags/${tag}?format=zip`;
     window.open(downloadUrl, "_blank"); // Opens download in a new tab
-  };
+};
 
-  export const downloadArtefactFile = (artefactName: string, tag: string, fileName: string): void => {
+export const downloadArtefactFile = (artefactName: string, tag: string, fileName: string): void => {
     const downloadUrl = `${API_BASE_URL}/artefacts/${artefactName}/tags/${tag}/assets/${fileName}`;
     window.open(downloadUrl, "_blank"); // Opens download in a new tab
-  };
+};
+
+export async function uploadArtefact(
+    artefactName: string,
+    tagName: string,
+    files: File[],
+    annotations: { key: string; value: string }[],
+    setUploadProgress?: (progress: number) => void
+  ): Promise<Response> {
+    const formData = new FormData();
+  
+    // Append files to FormData
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+    
+    const annotationsDict: Record<string, string> = annotations.reduce(
+        (acc, { key, value }) => {
+          acc[key] = value;
+          return acc;
+        },
+        {} as Record<string, string>
+    );
+
+    // Append annotations as a JSON string
+    formData.append("annotations", JSON.stringify(annotationsDict));
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_BASE_URL}/artefacts/${artefactName}/tags/${tagName}`);
+  
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && setUploadProgress) {
+        const percentComplete = (event.loaded / event.total) * 100;
+        setUploadProgress(percentComplete);
+      }
+    };
+  
+    return new Promise((resolve, reject) => {
+      xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve(xhr.response) : reject(xhr.statusText));
+      xhr.onerror = () => reject(xhr.statusText);
+      xhr.send(formData);
+    });
+  }

@@ -93,7 +93,6 @@ export default function Artefacts() {
     setArtefactDescriptionModalOpen(false);
   };
 
-
   return (
     <main>
       <Modal open={modalOpened} onClose={handleClose}>
