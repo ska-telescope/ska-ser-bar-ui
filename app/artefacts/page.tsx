@@ -1,4 +1,5 @@
 "use client";
+import { useSession } from "next-auth/react";
 import Container from "../components/container";
 import Navbar from "../components/navbar";
 import {
@@ -27,6 +28,9 @@ import ArtefactDetails from "../components/artefactDetails";
 import { fetchArtefacts, Artefact, fetchArtefactVersions, downloadArtefact} from "../actions";
 
 export default function Artefacts() {
+
+  const { data: session, status } = useSession();
+
   const [modalOpened, setModalOpened] = useState(false);
   const handleOpen = () => setModalOpened(true);
   const handleClose = () => setModalOpened(false);
@@ -92,6 +96,9 @@ export default function Artefacts() {
     setSelectedVersion(null);
     setArtefactDescriptionModalOpen(false);
   };
+
+  if (status === "loading") return <p>Loading...</p>;
+  if (!session) return <p>Access Denied. Please log in.</p>;
 
   return (
     <main>

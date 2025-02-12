@@ -1,4 +1,5 @@
 "use client";
+import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -15,7 +16,9 @@ export default function NavbarMenu() {
   };
   const handleClose = () => {
     setAnchorElement(null);
+    signOut({ callbackUrl: '/' });
   };
+  const { data: session, status } = useSession();
 
   return (
     <>
@@ -27,7 +30,7 @@ export default function NavbarMenu() {
           aria-haspopup="true"
           aria-expanded={open ? "true" : undefined}
         >
-          <span className="mx-2 text-sm text-white">Yilmaz, Ugur</span>
+          <span className="mx-2 text-sm text-white">{session.user?.name}</span>
           <AccountCircle className="text-white" width={24}></AccountCircle>
         </IconButton>
       </div>

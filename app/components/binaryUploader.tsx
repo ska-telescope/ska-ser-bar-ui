@@ -2,15 +2,12 @@ import { useState } from "react";
 
 import {
   Button,
-  FormControlLabel,
-  Checkbox,
   TextField,
   Divider,
-  styled,
   IconButton,
   Typography,
   LinearProgress,
-  CircularProgress
+  CircularProgress,
 } from "@mui/material";
 
 import { Add, Delete, FolderOpen } from "@mui/icons-material";
@@ -70,11 +67,19 @@ export default function BinaryUploader({
     setUploadProgress(0);
 
     try {
-      await uploadArtefact(artefactName, tagName, selectedFiles, annotations, setUploadProgress);
-      alert("Artefact uploaded successfully!");
-      setSelectedFiles([]);
+      const response = await uploadArtefact(artefactName, tagName, selectedFiles, annotations, setUploadProgress);
+      if (response.status === 201) {
+        alert(`Artefact "${artefactName}:${tagName}" uploaded successfully!`);
+        setSelectedFiles([]); // Clear file selection after successful upload
+      } else if (response.status === 409) {
+        alert(`Conflict: The artefact "${artefactName}:${tagName}" already exists. Please use a different tag.`);
+      } else {
+        alert("Unexpected response received. Please check the console for details.");
+        console.error("Unexpected Response:", response);
+      }
     } catch (error) {
-      alert("Upload failed. Check console for details.");
+      console.error("Upload failed:", error);
+      alert("An unexpected error occurred. Please try again later.");
     } finally {
       setIsUploading(false);
     }

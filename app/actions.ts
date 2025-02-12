@@ -91,7 +91,7 @@ export async function uploadArtefact(
     files: File[],
     annotations: { key: string; value: string }[],
     setUploadProgress?: (progress: number) => void
-  ): Promise<Response> {
+  ): Promise<{ status: number; body: any }> {
     const formData = new FormData();
   
     // Append files to FormData
@@ -121,8 +121,10 @@ export async function uploadArtefact(
     };
   
     return new Promise((resolve, reject) => {
-      xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve(xhr.response) : reject(xhr.statusText));
-      xhr.onerror = () => reject(xhr.statusText);
-      xhr.send(formData);
+        xhr.onload = () => {
+          resolve({ status: xhr.status, body: xhr.responseText });
+        };
+        xhr.onerror = () => reject({ status: xhr.status, message: xhr.statusText });
+        xhr.send(formData);
     });
   }

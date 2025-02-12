@@ -1,3 +1,5 @@
+"use client";
+import { SessionProvider } from "next-auth/react";
 import React from "react";
 import type { Metadata } from "next";
 import { Noto_Sans } from "next/font/google"; // eslint-disable-line
@@ -12,10 +14,10 @@ const font = Noto_Sans({ subsets: ["latin"] });
 
 config.autoAddCss = false;
 
-export const metadata: Metadata = {
+/*export const metadata: Metadata = {
   title: "SKA Binary Manager",
   description: "SKA Binary Manager",
-};
+};*/
 
 export default function RootLayout({
   children,
@@ -26,7 +28,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={font.className}>
         <AppRouterCacheProvider>
-          <ThemeProvider theme={theme}>{children}</ThemeProvider>
+          <ThemeProvider theme={theme}>
+            <SessionProvider>{children}</SessionProvider>
+          </ThemeProvider>
         </AppRouterCacheProvider>
       </body>
     </html>

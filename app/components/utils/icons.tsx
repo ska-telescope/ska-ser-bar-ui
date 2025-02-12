@@ -1,12 +1,12 @@
 import { Icon } from "@mui/material";
 import Image from "next/image";
 
-export function AzureAD() {
+export function Gitlab() {
   return (
     <Icon>
       <Image
-        alt="Azure AD logo"
-        src="/azure_ad.svg"
+        alt="Gitlab logo"
+        src="/gitlab_logo.svg"
         height={25}
         width={25}
       ></Image>
