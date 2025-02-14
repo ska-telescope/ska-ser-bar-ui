@@ -1,4 +1,5 @@
 .next
+build
 node_modules
 Dockerfile
 .dockerignore
@@ -7,3 +8,4 @@ Dockerfile
 README.md
 private
 secrets
+.env

@@ -17,11 +17,11 @@ export interface ArtefactVersion {
     created_at: string;
 }
 
-const API_BASE_URL = "http://localhost:8000/binary_artefacts/v1";
+const API_BASE_URL = "/proxy/api/v1";
 
 export async function fetchArtefacts(page: number = 1, pageSize: number = 10): Promise<{ artefacts: Artefact[]; total: number }> {
     try {
-        const response = await fetch(`${API_BASE_URL}/artefacts?page=${page}&page_size=${pageSize}`);
+        const response = await fetch(`${API_BASE_URL}/artefacts`);
         if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
@@ -49,26 +49,26 @@ export async function fetchArtefacts(page: number = 1, pageSize: number = 10): P
     }
 }
 
-export async function fetchArtefactVersions(artefact_name: string, page: number = 1, pageSize: number = 100): Promise<{ artefact_versions: ArtefactVersion[] }> {
+export async function fetchArtefactVersions(artefactName: string, page: number = 1, pageSize: number = 100): Promise<{ artefactVersions: ArtefactVersion[] }> {
     try {
-        const response = await fetch(`${API_BASE_URL}/artefacts/${artefact_name}?page=${page}&page_size=${pageSize}`);
+        const response = await fetch(`${API_BASE_URL}/artefacts/${artefactName}?page=${page}&page_size=${pageSize}`);
         if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
 
         const data = await response.json();
-        const artefact_versions = data
-            .filter((artefact_version: any) => artefact_version.digest) // Ensures 'digest' exists before mapping
-            .map((artefact_version: any) => ({
-                name: artefact_name,
-                digest: artefact_version.digest,
-                size: artefact_version.size,
-                tags: artefact_version.tags ? artefact_version.tags.map((tag: any) => tag.name) : [], // Extract tag names
-                annotations: artefact_version.annotations || null,
-                created_at: artefact_version.push_time
+        const artefactVersions = data
+            .filter((artefactVersion: any) => artefactVersion.digest) // Ensures 'digest' exists before mapping
+            .map((artefactVersion: any) => ({
+                name: artefactName,
+                digest: artefactVersion.digest,
+                size: artefactVersion.size,
+                tags: artefactVersion.tags ? artefactVersion.tags.map((tag: any) => tag.name) : [], // Extract tag names
+                annotations: artefactVersion.annotations || null,
+                created_at: artefactVersion.push_time
             }));
 
-        return { artefact_versions };
+        return { artefactVersions };
     } catch (error) {
         console.error("Failed to fetch artefact versions:", error);
         throw error;
@@ -90,6 +90,7 @@ export async function uploadArtefact(
     tagName: string,
     files: File[],
     annotations: { key: string; value: string }[],
+    authorName: string,
     setUploadProgress?: (progress: number) => void
   ): Promise<{ status: number; body: any }> {
     const formData = new FormData();
@@ -106,6 +107,10 @@ export async function uploadArtefact(
         },
         {} as Record<string, string>
     );
+
+    if (!Object.hasOwn(annotationsDict,"name")) {
+        annotationsDict.name = authorName;
+    }
 
     // Append annotations as a JSON string
     formData.append("annotations", JSON.stringify(annotationsDict));
@@ -124,7 +129,9 @@ export async function uploadArtefact(
         xhr.onload = () => {
           resolve({ status: xhr.status, body: xhr.responseText });
         };
-        xhr.onerror = () => reject({ status: xhr.status, message: xhr.statusText });
+        xhr.onerror = () => {
+            reject(new Error(`Request failed with status ${xhr.status}: ${xhr.statusText}`));
+        };
         xhr.send(formData);
     });
   }

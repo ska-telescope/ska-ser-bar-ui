@@ -22,10 +22,10 @@ export default function Home() {
             className="w-64 md:w-[30rem]"
           ></Image>
           <p className="text-center text-6xl font-bold text-ska-secondary md:text-8xl">
-            Binary Artefacts Manager
+            Binary Artefacts Repository
           </p>
           {status === "loading" ? (
-            <p>Loading...</p>
+            <p className="text-center text-6xl font-bold text-ska-primary md:text-xl">Loading...</p>
           ) : session ? (
             <>
               <p className="text-center text-6xl font-bold text-ska-primary md:text-xl">

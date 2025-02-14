@@ -1,6 +1,6 @@
 "use client";
 import { signOut, useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, MouseEvent } from "react";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -11,14 +11,14 @@ import { AccountCircle } from "@mui/icons-material";
 export default function NavbarMenu() {
   const [anchorElement, setAnchorElement] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorElement);
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleClick = (event: MouseEvent<HTMLElement>) => {
     setAnchorElement(event.currentTarget);
   };
   const handleClose = () => {
     setAnchorElement(null);
     signOut({ callbackUrl: '/' });
   };
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   return (
     <>
@@ -30,7 +30,7 @@ export default function NavbarMenu() {
           aria-haspopup="true"
           aria-expanded={open ? "true" : undefined}
         >
-          <span className="mx-2 text-sm text-white">{session.user?.name}</span>
+          <span className="mx-2 text-sm text-white">{session?.user?.name ?? "Guest"}</span>
           <AccountCircle className="text-white" width={24}></AccountCircle>
         </IconButton>
       </div>

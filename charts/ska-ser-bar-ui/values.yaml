@@ -1,0 +1,146 @@
+nameOverride:
+fullnameOverride:
+
+config:
+  cluster_domain: cluster.local
+  prefixWithNamespace: false
+  host: null
+  restApi:
+    service: binary-artefacts-app-ska-cicd-automation
+    namespace: null
+    prefix: null
+    port: null
+  secrets:
+    data:
+      binary_gitlab_client_id: null
+      binary_gitlab_client_secret: null
+      rest_api_token_header: null
+      rest_api_token_secret: null
+      nextauth_secret: null
+
+image:
+  repository: artefact.skao.int/ska-ser-bar-ui
+  pullPolicy: IfNotPresent
+  tag:
+
+replicas: 1
+
+labels: {}
+
+annotations: {}
+
+updateStrategy:
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 40%
+  type: RollingUpdate
+
+dnsPolicy: ClusterFirst
+
+apiPriorityAndFairness: false
+# -- Priority level configuration.
+# The block is directly forwarded into the priorityLevelConfiguration, so you can use whatever specification you want.
+# ref: https://kubernetes.io/docs/concepts/cluster-administration/flow-control/#prioritylevelconfiguration
+# @default -- See [values.yaml](values.yaml)
+priorityLevelConfigurationSpec:
+  type: Limited
+  limited:
+    nominalConcurrencyShares: 10
+    limitResponse:
+      queuing:
+        queueLengthLimit: 50
+      type: Queue
+
+startupProbe:
+  httpGet:
+    path: /
+    port: 8080
+    scheme: HTTP
+  failureThreshold: 20
+  initialDelaySeconds: 2
+  periodSeconds: 6
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: 8080
+    scheme: HTTP
+  initialDelaySeconds: 15
+  periodSeconds: 60
+  timeoutSeconds: 5
+  failureThreshold: 2
+  successThreshold: 1
+
+readinessProbe:
+  httpGet:
+    path: /proxy/api/health
+    port: 8080
+    scheme: HTTP
+  initialDelaySeconds: 5
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+nodeSelector: {}
+
+tolerations: []
+
+antiAffinity:
+  enabled: true
+
+podAntiAffinity:
+  preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 1
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/component
+              operator: In
+              values:
+                - api
+        topologyKey: kubernetes.io/hostname
+
+podAffinity: {}
+
+nodeAffinity: {}
+
+topologySpreadConstraints: []
+
+podSecurityContext: {}
+
+imagePullSecrets: []
+
+priorityClassName: ""
+
+resources:
+  limits:
+    memory: 2Gi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+securityContext: {}
+
+extraArgs: []
+
+extraEnvVars: []
+
+service:
+  enabled: true
+  port: 80
+  type: ClusterIP
+  nodePort:
+  annotations: {}
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  paths:
+    - path: /
+      pathType: ImplementationSpecific
+    - path: /api/auth
+      pathType: ImplementationSpecific
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"

@@ -1,7 +1,6 @@
 "use client";
 import { SessionProvider } from "next-auth/react";
 import React from "react";
-import type { Metadata } from "next";
 import { Noto_Sans } from "next/font/google"; // eslint-disable-line
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { ThemeProvider } from "@mui/material/styles";
@@ -13,11 +12,6 @@ import "@fortawesome/fontawesome-svg-core/styles.css";
 const font = Noto_Sans({ subsets: ["latin"] });
 
 config.autoAddCss = false;
-
-/*export const metadata: Metadata = {
-  title: "SKA Binary Manager",
-  description: "SKA Binary Manager",
-};*/
 
 export default function RootLayout({
   children,

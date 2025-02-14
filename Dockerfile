@@ -1,4 +1,4 @@
-FROM node:18-alpine AS base
+FROM node:21-alpine AS base
 
 # Install dependencies
 FROM base AS deps
@@ -11,8 +11,10 @@ RUN npm ci
 FROM base AS builder
 WORKDIR /build
 COPY --from=deps /build/node_modules ./node_modules
-COPY . .
-RUN npm run lint && npm run build
+COPY /src ./src
+COPY /public ./public
+COPY ./*.js ./*.json ./*.ts ./next.config.mjs ./
+RUN npm run build-production
 
 # Run
 FROM base AS runner
@@ -26,6 +28,7 @@ RUN adduser -S nextjs -u 1001
 COPY --from=builder /build/.next/standalone ./
 COPY --from=builder /build/.next/static ./.next/static
 COPY ./public ./public
+
 RUN chown -R nextjs:nodejs ./
 
 USER nextjs

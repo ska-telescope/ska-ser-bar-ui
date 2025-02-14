@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, ChangeEvent } from "react";
+import { useSession } from "next-auth/react";
 
 import {
   Button,
@@ -18,6 +19,7 @@ export default function BinaryUploader({
 }: {
   closeCallback: Function;
 }) {
+  const { data: session } = useSession();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [annotations, setAnnotations] = useState<{ key: string; value: string }[]>([{ key: "", value: "" }]);
   const [artefactName, setArtefactName] = useState<string>("");
@@ -28,7 +30,7 @@ export default function BinaryUploader({
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
   // Handle File Selection
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       setSelectedFiles([...selectedFiles, ...Array.from(event.target.files)]);
     }
@@ -67,7 +69,7 @@ export default function BinaryUploader({
     setUploadProgress(0);
 
     try {
-      const response = await uploadArtefact(artefactName, tagName, selectedFiles, annotations, setUploadProgress);
+      const response = await uploadArtefact(artefactName, tagName, selectedFiles, annotations, (session?.user?.name ?? "Guest"), setUploadProgress);
       if (response.status === 201) {
         alert(`Artefact "${artefactName}:${tagName}" uploaded successfully!`);
         setSelectedFiles([]); // Clear file selection after successful upload
