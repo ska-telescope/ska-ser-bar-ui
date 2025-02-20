@@ -1,0 +1,3 @@
+-i https://artefact.skao.int/repository/pypi-all/simple
+ska-ser-sphinx-theme
+sphinx

@@ -1,0 +1,9 @@
+.next/
+.vscode/
+node_modules
+.DS_Store
+private
+build
+dist
+secrets
+.env

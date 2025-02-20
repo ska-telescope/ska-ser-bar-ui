@@ -1,0 +1,32 @@
+{{- $prefix := "" }}
+{{- if .Values.config.prefixWithNamespace }}
+{{- $prefix = printf "/%s" .Release.Namespace }}
+{{- end }}
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ template "ska-ser-bar-ui.name" . }}
+  namespace: {{ include "ska-ser-bar-ui.namespace" . }}
+  labels:
+    {{- include "ska-ser-bar-ui.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  rules:
+    - host: {{ .Values.config.host }}
+      http:
+        paths:
+         {{- range .Values.ingress.paths }}
+          - path: {{ $prefix }}{{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ template "ska-ser-bar-ui.name" $ }}
+                port:
+                  name: http
+          {{- end }}
+{{- end }}

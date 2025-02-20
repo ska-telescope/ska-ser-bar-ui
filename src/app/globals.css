@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.side_panel {
+  @apply w-1/12 max-w-32 bg-gradient-to-b from-ska-primary to-ska-secondary;
+}
+
+.form_group {
+  @apply flex items-center justify-between space-x-4;
+}
+
+.form_group_entry {
+  @apply w-10 text-left font-semibold;
+}

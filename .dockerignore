@@ -1,0 +1,11 @@
+.next
+build
+node_modules
+Dockerfile
+.dockerignore
+.git
+.gitignore
+README.md
+private
+secrets
+.env

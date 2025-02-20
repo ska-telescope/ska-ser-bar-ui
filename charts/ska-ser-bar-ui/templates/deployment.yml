@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "ska-ser-bar-ui.name" . }}
+  namespace: {{ template "ska-ser-bar-ui.namespace" . }}
+  labels:
+    {{- include "ska-ser-bar-ui.labels" . | nindent 4 }}
+  annotations:
+    skao.int/configVersion: {{ include "ska-ser-bar-ui.configVersion" . }}
+spec:
+  replicas: {{ .Values.replicas }}
+  {{- with .Values.updateStrategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "ska-ser-bar-ui.matchLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "ska-ser-bar-ui.labels" . | nindent 8 }}
+        {{- with .Values.labels }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+      annotations:
+        skao.int/configVersion: {{ include "ska-ser-bar-ui.configVersion" . }}
+        {{- with .Values.annotations }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . | quote }}
+      {{- end }}
+      {{- with .Values.dnsPolicy }}
+      dnsPolicy: {{ . }}
+      {{- end }}
+      {{- if or .Values.antiAffinity.enabled .Values.podAffinity .Values.nodeAffinity }}
+      affinity:
+        {{- if .Values.antiAffinity.enabled }}
+        {{- with .Values.podAntiAffinity }}
+        podAntiAffinity:
+          {{- tpl (toYaml .) $ | nindent 10 }}
+        {{- end }}
+        {{- end }}
+        {{- with .Values.podAffinity }}
+        podAffinity:
+          {{- tpl (toYaml .) $ | nindent 10 }}
+        {{- end }}
+        {{- with .Values.nodeAffinity }}
+        nodeAffinity:
+          {{- tpl (toYaml .) $ | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: ui
+          image: {{ include "ska-ser-bar-ui.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: {{ .Values.extraArgs }}
+          {{- with .Values.resources }}
+          resources:
+            {{- tpl (toYaml .) $ | nindent 12 }}
+          {{- end }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+          - name: REST_API_URL
+            value: {{ include "ska-ser-bar-ui.restApiUrl" . }}
+          {{- with (concat .Values.extraEnvVars .Values.extraEnvVars) }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+          - name: NEXTAUTH_URL_INTERNAL
+            value: {{ include "ska-ser-bar-ui.internalAuthUrl" . }}
+          - name: NEXTAUTH_URL
+            value: {{ include "ska-ser-bar-ui.publicAuthUrl" . }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/.env
+              subPath: env
+          {{- with .Values.startupProbe }}
+          startupProbe:
+            {{- tpl (toYaml .) $ | nindent 12 }}
+          {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- tpl (toYaml .) $ | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- tpl (toYaml .) $ | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: config-volume
+          secret:
+            secretName: {{ template "ska-ser-bar-ui.name" . }}

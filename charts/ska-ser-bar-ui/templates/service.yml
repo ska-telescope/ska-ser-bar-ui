@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "ska-ser-bar-ui.name" . }}
+  namespace: {{ include "ska-ser-bar-ui.namespace" . }}
+  labels:
+    {{- include "ska-ser-bar-ui.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations: {{ tpl (toYaml .) $ | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - port: {{ .Values.service.port }}
+    targetPort: http
+    protocol: TCP
+    name: http
+    {{- if and (eq .Values.service.type "NodePort") (not (empty .Values.service.nodePort)) }}
+    nodePort: {{ .Values.service.nodePort }}
+    {{- end }}
+  selector:
+    {{- include "ska-ser-bar-ui.matchLabels" . | nindent 4 }}
