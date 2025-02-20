@@ -73,7 +73,7 @@ livenessProbe:
 
 readinessProbe:
   httpGet:
-    path: /proxy/api/health
+    path: /
     port: 8080
     scheme: HTTP
   initialDelaySeconds: 5

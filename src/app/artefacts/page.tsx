@@ -1,5 +1,6 @@
 "use client";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Container from "../components/container";
 import Navbar from "../components/navbar";
 import {
@@ -29,6 +30,7 @@ import { fetchArtefacts, Artefact, fetchArtefactVersions, ArtefactVersion } from
 export default function Artefacts() {
 
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   const [modalOpened, setModalOpened] = useState(false);
   const handleOpen = () => setModalOpened(true);
@@ -36,18 +38,24 @@ export default function Artefacts() {
 
   const [artefacts, setArtefacts] = useState<Artefact[]>([]);
   const [totalArtefacts, setTotalArtefacts] = useState(1);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
 
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchArtefacts()
       .then((data) => {
-        setArtefacts(data.artefacts);// Assuming 10 per page
+        setArtefacts(data.artefacts);
         setTotalArtefacts(data.total);
       })
       .catch((error) => console.error("Error fetching artefacts:", error));
-  }, [page, searchTerm, artefacts]);
+  }, []);
+
+  useEffect(() => {
+    if (!(status === "authenticated" && session)) {
+      router.push("/");
+    }
+  }, [status, session, router]);
 
   const [expandedArtefact, setExpandedArtefact] = useState<string | null>(null);
   // State to store artefact versions for each artefact
@@ -87,9 +95,6 @@ export default function Artefacts() {
 
   // Paginate artefacts
   const paginatedArtefacts = filteredArtefacts.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
-
-  if (status === "loading") return <p>Loading...</p>;
-  if (!session) return <p>Access Denied. Please log in.</p>;
 
   const isUserInGroup = session?.user?.groups_direct?.includes("ska-telescope");
 

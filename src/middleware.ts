@@ -1,9 +1,20 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const url = request.nextUrl;
     const baseApiUrl = process.env.REST_API_URL || "http://localhost:8000";
+
+    // Get the session token
+    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+    const isUserInGroup = token?.groups_direct.includes("ska-telescope");
+    if (!isUserInGroup) {
+        return NextResponse.json(
+            { message: "Unauthorized" },
+            { status: 401 }
+        );
+    }
 
     // Check if the request path starts with /proxy/api
     if (url.pathname.startsWith("/proxy/api")) {
