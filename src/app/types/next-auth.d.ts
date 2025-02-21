@@ -12,7 +12,9 @@ declare module "next-auth" {
     id: string;
     groups_direct: string[];
   }
+}
 
+declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     groups_direct: string[];

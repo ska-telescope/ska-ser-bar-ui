@@ -1,13 +1,21 @@
 "use client";
 import { signIn, useSession } from "next-auth/react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Container from "./components/container";
 import Image from "next/image";
-import Link from "next/link";
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 import { Gitlab } from "./components/utils/icons";
 
 export default function Home() {
   const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "authenticated" && session) {
+      router.push("/artefacts");
+    }
+  }, [status, session, router]);
 
   return (
     <main>
@@ -20,22 +28,18 @@ export default function Home() {
             width={512}
             height={512}
             className="w-64 md:w-[30rem]"
-          ></Image>
+          />
+
           <p className="text-center text-6xl font-bold text-ska-secondary md:text-8xl">
             Binary Artefacts Repository
           </p>
+
           {status === "loading" ? (
-            <p className="text-center text-6xl font-bold text-ska-primary md:text-xl">Loading...</p>
-          ) : session ? (
-            <>
-              <p className="text-center text-6xl font-bold text-ska-primary md:text-xl">
-                Welcome, {session.user?.name}
-              </p>
-              <Link href="/artefacts">
-                <Button variant="contained">Go to Artefacts</Button>
-              </Link>
-            </>
-          ) : (
+            <div className="flex flex-col items-center space-y-2">
+              <CircularProgress color="inherit" />
+              <p className="text-xl text-ska-primary">Redirecting to artefacts...</p>
+            </div>
+          ) : status === "authenticated" ? null : (
             <Button variant="contained" endIcon={<Gitlab />} onClick={() => signIn("gitlab")}>
               Continue with GitLab
             </Button>
