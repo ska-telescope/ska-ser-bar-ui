@@ -1,32 +1,32 @@
-FROM node:21-alpine AS base
+# TODO: Use published images
+ARG BUILD_IMAGE="registry.gitlab.com/ska-telescope/ska-base-images/ska-node-build:0.1.0"
+ARG BASE_IMAGE="registry.gitlab.com/ska-telescope/ska-base-images/ska-node:0.1.0"
+FROM $BUILD_IMAGE AS build
 
-# Install dependencies
-FROM base AS deps
-RUN apk add --no-cache libc6-compat
 WORKDIR /build
+
 COPY package*.json ./
+
 RUN npm ci
 
-# Build
-FROM base AS builder
-WORKDIR /build
-COPY --from=deps /build/node_modules ./node_modules
 COPY /src ./src
 COPY /public ./public
 COPY ./*.js ./*.json ./*.ts ./next.config.mjs ./
+
 RUN npm run build-production
 
-# Run
-FROM base AS runner
+FROM $BASE_IMAGE
+
 WORKDIR /app
 
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+RUN groupadd -g 1001 nodejs && \
+    useradd  -u 1001 nextjs && \
+    usermod -aG nextjs nextjs
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder /build/.next/standalone ./
-COPY --from=builder /build/.next/static ./.next/static
+COPY --from=build /build/.next/standalone ./
+COPY --from=build /build/.next/static ./.next/static
 COPY ./public ./public
 
 RUN chown -R nextjs:nodejs ./

@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.0.3
+- Added: Using SKA base images
+
 ## 0.0.2
 - Added: session token validation on middleware.
 - Added: Redirect on sign in.

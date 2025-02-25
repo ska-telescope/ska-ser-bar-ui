@@ -17,6 +17,10 @@ include:
     # TS linting and unit testing
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/js-lint.gitlab-ci.yml'
+    ref: st-2297-adopt-ska-base-image
+  - project: 'ska-telescope/templates-repository'
+    file: 'gitlab-ci/includes/js-audit.gitlab-ci.yml'
+    ref: st-2297-adopt-ska-base-image
     # Accessibility
   - template: 'Verify/Accessibility.gitlab-ci.yml'
     # OCI Images
