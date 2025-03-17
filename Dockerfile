@@ -1,6 +1,6 @@
 # TODO: Use published images
-ARG BUILD_IMAGE="registry.gitlab.com/ska-telescope/ska-base-images/ska-node-build:0.1.0"
-ARG BASE_IMAGE="registry.gitlab.com/ska-telescope/ska-base-images/ska-node:0.1.0"
+ARG BUILD_IMAGE="registry.gitlab.com/ska-telescope/ska-base-images/ska-build-node:0.1.0-dev.cfccfd72b"
+ARG BASE_IMAGE="registry.gitlab.com/ska-telescope/ska-base-images/ska-node:0.1.0-dev.cfccfd72b"
 FROM $BUILD_IMAGE AS build
 
 WORKDIR /build
